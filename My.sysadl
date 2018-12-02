@@ -1,0 +1,35 @@
+Model SysADLArchitecture;
+package SysADL.types {
+	value type Int {
+	}
+	value type Boolean {
+	}
+	value type String {
+	}
+	value type Void {
+	}
+	value type Real {
+	}
+}
+Requirement OrdenacaoPalavras ( 0 ) {
+	text = "Deve ordenar as palavras em forma ascendente ou descendente"
+	Requirement ProcessamentoArquivo ( 0 ) {
+		text = "Deve ler cada linha do arquivo e separar cada palavra" Requirement
+		FiltragemPalavras ( 0 ) {
+			text =
+			"Deve filtrar as palavras de acordo com o caractere ou com a String de entrada"
+		}
+	}
+Requirement OrdenarDescendente ( 0 ) {
+		text = "Deve ordenar as palavras filtradas em ordem descendente"
+	}
+	Requirement OrdenarAscendente ( 0 ) {
+		text = "Deve ordenar as palavras filtradas em ordem ascendente"
+	}
+}
+Requirement ExibicaoPalavras ( 0 ) {
+	text = "Deve exibir as palavras processadas"
+}
+Requirement LerArquivo ( 0 ) {
+	text = "Deve receber um arquivo e ler seu conteúdo"
+}
