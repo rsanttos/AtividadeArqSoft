@@ -1,0 +1,287 @@
+Model SysADLArchitecture;
+package SysADL.types {
+	value type Int {
+	}
+	value type Boolean {
+	}
+	value type String {
+	}
+	value type Void {
+	}
+	value type Real {
+	}
+datatype ListaDePalavras {
+	}
+	enum TipoDeOrdenacao {
+		Ascendente, Descendente
+	, TamanhoDecrescente
+	}
+datatype Arquivo {
+	}
+}
+package Conectores {
+import Portas;
+	connector def ListaDePalavrasConnector {
+		participants:
+		~PortaListaDePalavrasIPT : PortaListaDePalavrasIPT;
+		~PortaListaDePalavrasOPT : PortaListaDePalavrasOPT;
+	}
+	connector def StringConnector {
+		participants:
+		~PortaStringIPT : PortaStringIPT;
+		~PortaStringOPT : PortaStringOPT;
+	}
+	connector def TipoDeOrdenacaoConnector {
+		participants:
+		~PortaTipoDeOrdenacaoIPT : PortaTipoDeOrdenacaoIPT;
+		~PortaTipoDeOrdenacaoOPT : PortaTipoDeOrdenacaoOPT;
+	}
+	connector def ArquivoConnector {
+		participants:
+		~PortaArquivoIPT : PortaArquivoIPT;
+		~PortaArquivoOPT : PortaArquivoOPT;
+	}
+}
+package Portas {
+import SysADL.types;
+	port def PortaStringIPT {
+		flow in String
+	}
+	port def PortaStringOPT {
+		flow out String
+	}
+	port def PortaTipoDeOrdenacaoIPT {
+		flow in TipoDeOrdenacao
+	}
+	port def PortaTipoDeOrdenacaoOPT {
+		flow out TipoDeOrdenacao
+	}
+	port def PortaListaDePalavrasIPT {
+		flow in ListaDePalavras
+	}
+	port def PortaListaDePalavrasOPT {
+		flow out ListaDePalavras
+	}
+	port def PortaArquivoIPT {
+		flow in Arquivo
+	}
+	port def PortaArquivoOPT {
+		flow out Arquivo
+	}
+}
+package Componentes {
+	import Conectores;
+	import Portas;
+	import SysADL.types;
+	boundary component def RecebeArquivoCP {
+		ports:
+		ArquivoParaSerConvertidoOPT : PortaArquivoOPT [ 1, 50 ];
+	}
+	component def ConversorArquivoCP {
+		ports:
+		ArquivoParaSerConvertidoIPT : PortaArquivoIPT;
+		StringDoArquivoOPT : PortaStringOPT;
+	}
+	component def SeparadorPalavrasCP {
+		ports:
+		StringDoArquivoIPT : PortaStringIPT;
+		PalavrasSeparadasOPT : PortaListaDePalavrasOPT;
+	}
+	component def VerificaFiltroCP {
+		ports:
+		PalavrasSeparadasIPT : PortaListaDePalavrasIPT;
+		CriterioFiltroIPT : PortaStringIPT;
+		PalavraFiltradaOPT : PortaListaDePalavrasOPT;
+	}
+	component def OrdenacaoCP {
+		ports:
+		PalavrasParaOrdenarIPT : PortaListaDePalavrasIPT;
+		TipoDeOrdenacaoIPT : PortaTipoDeOrdenacaoIPT;
+		ListaDePalavrasOrdenadasOPT : PortaListaDePalavrasOPT;
+		configuration {
+			components:
+			OrdenacaoAscCP : OrdenacaoAscCP {
+				using
+				ports:
+				PalavrasParaOrdenarAscIPT : PortaListaDePalavrasIPT;
+				PalavrasOrdenadasAscOPT : PortaListaDePalavrasOPT;
+			}
+			OrdenacaoDescCP : OrdenacaoDescCP {
+				using
+				ports:
+				PalavrasParaOrdenarDescIPT : PortaListaDePalavrasIPT;
+				PalavrasOrdenadasDescOPT : PortaListaDePalavrasOPT;
+			}
+			OrdenacaoTamanhoDecrescenteCP : OrdenacaoTamanhoDecrescenteCP {
+				using
+				ports:
+				PalavrasParaOrdenarTamDescIPT : PortaListaDePalavrasIPT;
+				PalavrasOrdenadasTamDescOPT : PortaListaDePalavrasOPT;
+			}
+			delegations:
+			PalavrasParaOrdenarAscIPT to PalavrasParaOrdenarIPT
+			PalavrasParaOrdenarDescIPT to PalavrasParaOrdenarIPT
+			PalavrasOrdenadasDescOPT to ListaDePalavrasOrdenadasOPT
+			PalavrasOrdenadasAscOPT to ListaDePalavrasOrdenadasOPT
+		PalavrasParaOrdenarTamDescIPT to TipoDeOrdenacaoIPT
+			PalavrasOrdenadasTamDescOPT to ListaDePalavrasOrdenadasOPT
+		}
+	}
+	component def OrdenacaoAscCP {
+		ports:
+		PalavrasParaOrdenarAscIPT : PortaListaDePalavrasIPT;
+		PalavrasOrdenadasAscOPT : PortaListaDePalavrasOPT;
+	}
+	component def OrdenacaoDescCP {
+		ports:
+		PalavrasParaOrdenarDescIPT : PortaListaDePalavrasIPT;
+		PalavrasOrdenadasDescOPT : PortaListaDePalavrasOPT;
+	}
+	boundary component def DisplayListaDePalavrasInJsonCP {
+		ports:
+		PalavrasParaMostrarInJsonIPT : PortaListaDePalavrasIPT;
+	}
+	component def SistemaCP {
+		configuration {
+			components:
+			RecebeArquivoCP : RecebeArquivoCP {
+				using
+				ports:
+				ArquivoParaSerConvertidoOPT : PortaArquivoOPT;
+			}
+			ConversorArquivoCP : ConversorArquivoCP {
+				using
+				ports:
+				ArquivoParaSerConvertidoIPT : PortaArquivoIPT;
+				StringDoArquivoOPT : PortaStringOPT;
+			}
+			SeparadorPalavrasCP : SeparadorPalavrasCP {
+				using
+				ports:
+				StringDoArquivoIPT : PortaStringIPT;
+				PalavrasSeparadasOPT : PortaListaDePalavrasOPT;
+			}
+			VerificaFiltroCP : VerificaFiltroCP {
+				using
+				ports:
+				PalavrasSeparadasIPT : PortaListaDePalavrasIPT;
+				CriterioFiltroIPT : PortaStringIPT;
+				PalavraFiltradaOPT : PortaListaDePalavrasOPT;
+			}
+			OrdenacaoCP : OrdenacaoCP {
+				using
+				ports:
+				PalavrasParaOrdenarIPT : PortaListaDePalavrasIPT;
+				TipoDeOrdenacaoIPT : PortaTipoDeOrdenacaoIPT;
+				ListaDePalavrasOrdenadasOPT : PortaListaDePalavrasOPT;
+			}
+			DisplayListaDePalavrasInJsonCP : DisplayListaDePalavrasInJsonCP {
+				using
+				ports:
+				PalavrasParaMostrarInJsonIPT : PortaListaDePalavrasIPT;
+			}
+			DisplayListaDePalavrasInDisplayCP : DisplayListaDePalavrasInDisplayCP {
+				using
+				ports:
+				PalavrasParaMostrarInDisplayIPT : PortaListaDePalavrasIPT;
+			}
+			connectors:
+			ArquivoParaConverterEmString : ArquivoConnector bindings
+			ArquivoParaSerConvertidoOPT = ArquivoParaSerConvertidoIPT;
+			ArquivoConvertidoConnector : StringConnector bindings StringDoArquivoOPT =
+			StringDoArquivoIPT;
+			PalavrasSeparadasConnector : ListaDePalavrasConnector bindings
+			PalavrasSeparadasOPT = PalavrasSeparadasIPT;
+			ListaDePalavrasFiltradasConnector : ListaDePalavrasConnector bindings
+			PalavraFiltradaOPT = PalavrasParaOrdenarIPT;
+			ListaDePalavrasOrdenadasConnector : ListaDePalavrasConnector bindings
+			ListaDePalavrasOrdenadasOPT = PalavrasParaMostrarInJsonIPT;
+		PalavrasOrdenadasParaDisplayConnector : ListaDePalavrasConnector bindings
+			PalavrasParaMostrarInDisplayIPT = ListaDePalavrasOrdenadasOPT;
+		}
+	}
+activity def ConverterArquivoParaStringAC ( ArquivoParaConverter : Arquivo ) : (
+	StringDoArquivo : String ) {
+		body {
+			actions : ConverterArquivoParaStringAN : ConverterArquivoParaStringAN {
+				using pins : inArquivo : Arquivo;
+			}
+			delegate ArquivoParaConverter to inArquivo
+			delegate StringDoArquivo to ConverterArquivoParaStringAN
+		}
+	}
+	action def ConverterArquivoParaStringAN ( inArquivo : Arquivo ) : String {
+	}
+	activity def SepararPalavrasAC ( StringParaSepararPalavras : String ) : (
+	PalavrasSeparadas : ListaDePalavras ) {
+		body {
+			actions : SepararStringEmListaDePalavrasAN :
+			SepararStringEmListaDePalavrasAN {
+				using pins : StringParaSeparar : String;
+			}
+			delegate StringParaSepararPalavras to StringParaSeparar
+			delegate PalavrasSeparadas to SepararStringEmListaDePalavrasAN
+		}
+	}
+	action def SepararStringEmListaDePalavrasAN ( StringParaSeparar : String ) :
+	ListaDePalavras {
+	}
+	activity def VerificarFiltroAC ( ListaDePalavrasParaVerificarFiltro :
+	ListaDePalavras, CriterioFiltro : String ) : ( PalavrasFiltradas :
+	ListaDePalavras ) {
+		body {
+			actions : VerificarPalavrasQueSatisfazemFiltroAN :
+			VerificarPalavrasQueSatisfazemFiltroAN {
+				using pins : PalavrasParaVerificar : ListaDePalavras;
+				CriterioParaFiltro : String;
+			}
+			delegate ListaDePalavrasParaVerificarFiltro to PalavrasParaVerificar
+			delegate CriterioFiltro to CriterioParaFiltro
+			delegate PalavrasFiltradas to VerificarPalavrasQueSatisfazemFiltroAN
+		}
+	}
+	action def VerificarPalavrasQueSatisfazemFiltroAN ( PalavrasParaVerificar :
+	ListaDePalavras, CriterioParaFiltro : String ) : ListaDePalavras {
+	}
+	activity def OrdenarPalavrasAC ( PalavrasParaOrdenar : ListaDePalavras,
+	TipoDeOrdenacao : TipoDeOrdenacao ) : ( PalavrasOrdenadas : ListaDePalavras )
+	{
+		constraint : post-condition DefineTipoOrdenacao body {
+			actions : OrdenarPalavrasAscAN : OrdenarPalavrasAscAN {
+				using pins : PalavrasParaOrdenarAsc : ListaDePalavras;
+			}
+			OrdenarPalavrasDescAN : OrdenarPalavrasDescAN {
+				using pins : PalavrasParaOrdenarDesc : ListaDePalavras;
+			}
+			OrdenarPalavrasTamanhoDescAN : OrdenarPalavrasTamanhoDescAN {
+				using pins : PalavrasParaOrdenarTamanhoDesc : ListaDePalavras;
+			}
+			delegate PalavrasParaOrdenar to PalavrasParaOrdenarAsc
+			delegate PalavrasParaOrdenar to PalavrasParaOrdenarDesc
+			delegate PalavrasOrdenadas to OrdenarPalavrasAscAN
+			delegate PalavrasOrdenadas to OrdenarPalavrasDescAN
+			delegate PalavrasParaOrdenar to PalavrasParaOrdenarTamanhoDesc
+			delegate PalavrasOrdenadas to OrdenarPalavrasTamanhoDescAN
+		}
+	}
+	action def OrdenarPalavrasDescAN ( PalavrasParaOrdenarDesc : ListaDePalavras )
+	: ListaDePalavras {
+	}
+	action def OrdenarPalavrasAscAN ( PalavrasParaOrdenarAsc : ListaDePalavras ) :
+	ListaDePalavras {
+	}
+	component def OrdenacaoTamanhoDecrescenteCP {
+		ports:
+		PalavrasParaOrdenarTamDescIPT : PortaListaDePalavrasIPT;
+		PalavrasOrdenadasTamDescOPT : PortaListaDePalavrasOPT;
+	}
+	action def OrdenarPalavrasTamanhoDescAN ( PalavrasParaOrdenarTamanhoDesc :
+	ListaDePalavras ) : ListaDePalavras {
+	}
+	constraint DefineTipoOrdenacao ( TipoDeOrdenacaoIn : TipoDeOrdenacao ) {
+	}
+	boundary component def DisplayListaDePalavrasInDisplayCP {
+		ports:
+		PalavrasParaMostrarInDisplayIPT : PortaListaDePalavrasIPT;
+	}
+}
