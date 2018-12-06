@@ -21,6 +21,7 @@ datatype Arquivo {
 }
 package Conectores {
 import Portas;
+	import Componentes;
 	connector def ListaDePalavrasConnector {
 		participants:
 		~PortaListaDePalavrasIPT : PortaListaDePalavrasIPT;
@@ -40,6 +41,18 @@ import Portas;
 		participants:
 		~PortaArquivoIPT : PortaArquivoIPT;
 		~PortaArquivoOPT : PortaArquivoOPT;
+	configuration {
+			components:
+			ConversorArquivoCP : ConversorArquivoCP {
+				using
+				ports:
+				ArquivoParaSerConvertidoIPT : PortaArquivoIPT;
+				StringDoArquivoOPT : PortaStringOPT;
+			}
+			delegations:
+			ArquivoParaSerConvertidoIPT to PortaArquivoIPT StringDoArquivoOPT to
+			PortaArquivoOPT
+		}
 	}
 }
 package Portas {
@@ -68,6 +81,16 @@ import SysADL.types;
 	port def PortaArquivoOPT {
 		flow out Arquivo
 	}
+port def ArquivoCompositePort {
+		ports:
+		port1 : PortaArquivoIPT;
+		port2 : PortaArquivoIPT;
+	}
+	port def StringCompositePort {
+		ports:
+		port1 : PortaStringOPT;
+		port2 : PortaStringOPT;
+	}
 }
 package Componentes {
 	import Conectores;
@@ -79,7 +102,7 @@ package Componentes {
 	}
 	component def ConversorArquivoCP {
 		ports:
-		ArquivoParaSerConvertidoIPT : PortaArquivoIPT;
+		ArquivoParaSerConvertidoIPT : PortaArquivoIPT [ 1, 999 ];
 		StringDoArquivoOPT : PortaStringOPT;
 	}
 	component def SeparadorPalavrasCP {
@@ -149,12 +172,7 @@ package Componentes {
 				ports:
 				ArquivoParaSerConvertidoOPT : PortaArquivoOPT;
 			}
-			ConversorArquivoCP : ConversorArquivoCP {
-				using
-				ports:
-				ArquivoParaSerConvertidoIPT : PortaArquivoIPT;
-				StringDoArquivoOPT : PortaStringOPT;
-			}
+			
 			SeparadorPalavrasCP : SeparadorPalavrasCP {
 				using
 				ports:
@@ -185,11 +203,13 @@ package Componentes {
 				ports:
 				PalavrasParaMostrarInDisplayIPT : PortaListaDePalavrasIPT;
 			}
+			ConverteVariosArquivosCP : ConverteVariosArquivosCP {
+				using
+				ports:
+				ArquivosParaConverterIPT : ArquivoCompositePort;
+				ArquivoConvertidoOPT : StringCompositePort;
+			}
 			connectors:
-			ArquivoParaConverterEmString : ArquivoConnector bindings
-			ArquivoParaSerConvertidoOPT = ArquivoParaSerConvertidoIPT;
-			ArquivoConvertidoConnector : StringConnector bindings StringDoArquivoOPT =
-			StringDoArquivoIPT;
 			PalavrasSeparadasConnector : ListaDePalavrasConnector bindings
 			PalavrasSeparadasOPT = PalavrasSeparadasIPT;
 			ListaDePalavrasFiltradasConnector : ListaDePalavrasConnector bindings
@@ -198,6 +218,10 @@ package Componentes {
 			ListaDePalavrasOrdenadasOPT = PalavrasParaMostrarInJsonIPT;
 		PalavrasOrdenadasParaDisplayConnector : ListaDePalavrasConnector bindings
 			PalavrasParaMostrarInDisplayIPT = ListaDePalavrasOrdenadasOPT;
+			ArquivosParaConverterConnector : ArquivoConnector bindings
+			ArquivoParaSerConvertidoOPT = ArquivosParaConverterIPT;
+			ArquivosConvertidosConnector : StringConnector bindings ArquivoConvertidoOPT
+			= StringDoArquivoIPT;
 		}
 	}
 activity def ConverterArquivoParaStringAC ( ArquivoParaConverter : Arquivo ) : (
@@ -283,5 +307,22 @@ activity def ConverterArquivoParaStringAC ( ArquivoParaConverter : Arquivo ) : (
 	boundary component def DisplayListaDePalavrasInDisplayCP {
 		ports:
 		PalavrasParaMostrarInDisplayIPT : PortaListaDePalavrasIPT;
+	}
+	component def ConverteVariosArquivosCP {
+		ports:
+		ArquivosParaConverterIPT : ArquivoCompositePort;
+		ArquivoConvertidoOPT : StringCompositePort [ 1, 999 ];
+		configuration {
+			components:
+			ConversorArquivoCP : ConversorArquivoCP {
+				using
+				ports:
+				ArquivoParaSerConvertidoIPT : PortaArquivoIPT;
+				StringDoArquivoOPT : PortaStringOPT;
+			}
+			delegations:
+			ArquivoParaSerConvertidoIPT to ArquivosParaConverterIPT StringDoArquivoOPT
+			to ArquivoConvertidoOPT
+		}
 	}
 }
